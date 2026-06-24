@@ -7,11 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// =============================================
-// ===== CODE DECODE =====
-// =============================================
-
-// === BIT32 IMPLEMENTATION ===
 const bit32 = {
     bxor: function(a, b) {
         let r = 0, m = 1;
@@ -52,7 +47,6 @@ function EQ(a, r) {
     return false;
 }
 
-// === _gct FUNCTION ===
 function _gct() {
     let s = 17, p1 = {}, p2 = {}, p3 = {};
     const _m = {[17]: 23, [23]: 41, [41]: 999};
@@ -77,7 +71,6 @@ function _gct() {
 
 const [_CT, _BT] = _gct();
 
-// === _sp FUNCTION ===
 const _sp = (function() {
     const _xk = [0x61, 0x9A, 0x43, 0xF1, 0x27, 0xBC, 0x58, 0x0D, 0xE7, 0x33];
     const _enc = [
@@ -114,7 +107,6 @@ const _sp = (function() {
     return _d;
 })();
 
-// === _gb FUNCTION ===
 function _gb(str, pos) {
     let c = 0, s = 5;
     const _states = {[5]: 7, [7]: 11, [11]: 999};
@@ -147,7 +139,6 @@ function _gb(str, pos) {
     }
 }
 
-// === _tc FUNCTION ===
 function _tc(num) {
     if (EQ(num, num)) {
         return _CT[num % 256];
@@ -155,7 +146,6 @@ function _tc(num) {
     return "";
 }
 
-// === _js FUNCTION ===
 function _js(tbl) {
     let r = "", s = 3;
     const _sm = {[3]: 8, [8]: 999};
@@ -171,7 +161,6 @@ function _js(tbl) {
     }
 }
 
-// === _gl FUNCTION ===
 function _gl(str) {
     let c = 0;
     for (const _ of str) c++;
@@ -179,7 +168,6 @@ function _gl(str) {
     return 0;
 }
 
-// === _rp FUNCTION ===
 function _rp(str, pat, rep) {
     let r = "", pl = _gl(pat), m = true;
     for (let i = 1; i <= pl; i++) {
@@ -207,7 +195,6 @@ function _rp(str, pat, rep) {
     return str;
 }
 
-// === _cs FUNCTION ===
 function _cs(...args) {
     let r = "";
     for (let i = 1; i <= args.length; i++) {
@@ -217,7 +204,6 @@ function _cs(...args) {
     return "";
 }
 
-// === _gks FUNCTION ===
 function _gks(key, len) {
     const ks = [], kl = _gl(key);
     let st = 0;
@@ -231,7 +217,6 @@ function _gks(key, len) {
     return [];
 }
 
-// === _mix_key_material FUNCTION ===
 function _mix_key_material(key, salt) {
     const rev = key.split('').reverse().join('');
     const out = [];
@@ -256,7 +241,6 @@ function _randb() {
     return Math.floor(Math.random() * 256);
 }
 
-// === _gensalt128 FUNCTION ===
 function _gensalt128() {
     const t = [];
     for (let i = 1; i <= 16; i++) {
@@ -265,7 +249,6 @@ function _gensalt128() {
     return _js(t);
 }
 
-// === _secure_round_enc FUNCTION ===
 function _secure_round_enc(key, data, salt, round_idx) {
     const dl = _gl(data);
     const ks = _derive_stream(_cs(key, _tc(48 + round_idx)), salt, dl);
@@ -286,7 +269,6 @@ function _secure_round_enc(key, data, salt, round_idx) {
     return _js(r);
 }
 
-// === _secure_round_dec FUNCTION ===
 function _secure_round_dec(key, data, salt, round_idx) {
     const dl = _gl(data);
     const ks = _derive_stream(_cs(key, _tc(48 + round_idx)), salt, dl);
@@ -307,7 +289,6 @@ function _secure_round_dec(key, data, salt, round_idx) {
     return _js(r);
 }
 
-// === _ae FUNCTION ===
 function _ae(key, data, salt, rnd) {
     rnd = rnd || 3;
     let r = data;
@@ -318,7 +299,6 @@ function _ae(key, data, salt, rnd) {
     return r;
 }
 
-// === _ad FUNCTION ===
 function _ad(key, data, salt, rnd) {
     rnd = rnd || 3;
     let r = data;
@@ -329,7 +309,6 @@ function _ad(key, data, salt, rnd) {
     return r;
 }
 
-// === _b64 FUNCTION ===
 const _b64 = (function() {
     const chs = String.fromCharCode(
         65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,
@@ -387,10 +366,6 @@ function decodeJobId(encrypted) {
     return "";
 }
 
-// =============================================
-// ===== ENCODE MAP V2 =====
-// =============================================
-
 const baseEncodeMap = {
     "a": "#1@2#1@2", "b": "$3%4$3%4", "c": "^5&6^5&6", "d": "*7(8*7(8",
     "e": ")9-0)9-0", "f": "!1_2!1_2", "g": "+3=4+3=4", "h": "?5/6?5/6",
@@ -443,7 +418,6 @@ function randomizeMapping() {
     currentEncodeMap = generateRandomMapping();
 }
 
-// ===== DANH SÁCH CHARACTER =====
 const CHARACTERS = [
     "CakePrince", "CakeQueen", "CursedCaptain", "Darkbeard", 
     "DoughKing", "Elite", "FullMoon", "Fullmoon", 
@@ -452,13 +426,11 @@ const CHARACTERS = [
     "SoulReaper", "WinterSky"
 ];
 
-// ===== BIẾN ĐẾM JOB =====
 let jobCounts = {};
 CHARACTERS.forEach(name => {
     jobCounts[name] = { a: 0, b: 0, c: 0, d: 0, e: 0, f: 0 };
 });
 
-// ===== HÀM LƯU JSON =====
 function saveToApi(name, dataList) {
     if (!fs.existsSync('api')) fs.mkdirSync('api');
     const fileName = `api/${name.replace(/\s+/g, '')}.json`;
@@ -478,7 +450,6 @@ function saveToApi(name, dataList) {
     fs.writeFileSync(fileName, JSON.stringify(jsonOutput, null, 2));
 }
 
-// ===== HÀM LOG JOB COUNTS =====
 function logJobCounts() {
     console.log("\n" + "=".repeat(70));
     console.log("[Seramic] 📊 Thống kê Job ID theo từng nguồn:");
@@ -566,7 +537,6 @@ async function updateAll() {
         }
     }
 
-    // ===== NGUỒN B =====
     const sourceB = [
         { name: "RipIndra",      url: "http://fi11.bot-hosting.net:20758/api/name=RipIndra" },
         { name: "Darkbeard",     url: "http://fi11.bot-hosting.net:20758/api/name=Darkbeard" },
@@ -617,7 +587,6 @@ async function updateAll() {
 
     await Promise.allSettled(fetchPromises);
 
-    // ===== NGUỒN C, D, E, F =====
     console.log("[Seramic] Đang lấy dữ liệu từ nguồn C...");
     for (const name of CHARACTERS) {
         const fakeCount = Math.floor(Math.random() * 15) + 5;
@@ -677,15 +646,13 @@ async function updateAll() {
     console.log(`[Seramic] ✅ Hoàn tất!`);
 }
 
-// ===== SERVER API =====
 app.get('/api', (req, res) => {
     res.json({
-        message: "👋 Chào mừng! Tại sao bạn lại ở đây?",
+        message: "why have a black monkey here?",
         ApiHopBF: "By Seramic"
     });
 });
 
-// Endpoint cho từng character cụ thể
 app.get('/api/:character', (req, res) => {
     const characterName = req.params.character;
     
@@ -712,15 +679,12 @@ app.get('/api/:character', (req, res) => {
     }
 });
 
-// ===== KHỞI ĐỘNG =====
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`[Seramic] 🚀 Server đã sẵn sàng`);
     console.log(`[Seramic] 📍 Port: ${PORT}`);
 });
 
-// Scraper chạy mỗi 20 giây
 setInterval(updateAll, 20000);
 
-// Chạy lần đầu khi khởi động
 updateAll();
