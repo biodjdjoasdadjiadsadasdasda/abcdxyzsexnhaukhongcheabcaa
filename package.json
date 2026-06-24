@@ -1,7 +1,7 @@
 {
-  "name": "bloxfruit-api",
+  "name": "SeramicApiHop",
   "version": "1.0.0",
-  "description": "BloxFruit API Hop",
+  "description": "BloxFruit API Hop by Seramic",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
