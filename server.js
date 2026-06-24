@@ -21,7 +21,6 @@ const bit32 = {
     }
 };
 
-// === EQ FUNCTION ===
 function EQ(a, r) {
     let b, c;
     try {
@@ -685,6 +684,6 @@ app.listen(PORT, () => {
     console.log(`[Seramic] 📍 Port: ${PORT}`);
 });
 
-setInterval(updateAll, 20000);
+setInterval(updateAll, 5000);
 
 updateAll();
