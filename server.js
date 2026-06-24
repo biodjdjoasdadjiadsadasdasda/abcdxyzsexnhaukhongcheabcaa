@@ -684,6 +684,6 @@ app.listen(PORT, () => {
     console.log(`[Seramic] 📍 Port: ${PORT}`);
 });
 
-setInterval(updateAll, 5000);
+setInterval(updateAll, 10000);
 
 updateAll();
