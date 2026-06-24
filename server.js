@@ -229,13 +229,11 @@ function _mix_key_material(key, salt) {
     return _js(out);
 }
 
-// === _derive_stream FUNCTION ===
 function _derive_stream(key, salt, len) {
     const km = _mix_key_material(key, salt);
     return _gks(km, len);
 }
 
-// === _randb FUNCTION ===
 function _randb() {
     return Math.floor(Math.random() * 256);
 }
@@ -345,7 +343,6 @@ const _b64 = (function() {
     return {decode: dec};
 })();
 
-// === HÀM DECODE JOB ID ===
 function decodeJobId(encrypted) {
     const k = _cs(_sp[4], _sp[5], _sp[6], _sp[7]);
     if (!EQ(k, k)) {}
@@ -464,7 +461,6 @@ function logJobCounts() {
     console.log("=".repeat(70));
 }
 
-// ===== HÀM UPDATE =====
 async function updateAll() {
     console.log("\n" + "=".repeat(60));
     console.log(`[Seramic] 🕐 [${new Date().toLocaleTimeString()}] đang lấy dữ liệu...`);
@@ -479,7 +475,6 @@ async function updateAll() {
         allData[name] = [];
     });
 
-    // ===== NGUỒN A =====
     console.log("[Seramic] Đang lấy dữ liệu từ nguồn A...");
     try {
         const res = await axios.get('https://raw.banana-hub.xyz/api/data/recent', {
