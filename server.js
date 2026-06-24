@@ -362,7 +362,7 @@ function decodeJobId(encrypted) {
     return "";
 }
 
-const baseEncodeMap = {
+const encodeMap = {
     "a": "#1@2#1@2", "b": "$3%4$3%4", "c": "^5&6^5&6", "d": "*7(8*7(8",
     "e": ")9-0)9-0", "f": "!1_2!1_2", "g": "+3=4+3=4", "h": "?5/6?5/6",
     "i": "@7#8@7#8", "j": "$9%0$9%0", "k": "^1&2^1&2", "l": "*3(4*3(4",
@@ -383,35 +383,14 @@ const baseEncodeMap = {
     "-": "@#$%4%^2", "_": "a@!#P!@!2"
 };
 
-function generateRandomMapping() {
-    const keys = Object.keys(baseEncodeMap);
-    const values = Object.values(baseEncodeMap);
-    
-    for (let i = values.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [values[i], values[j]] = [values[j], values[i]];
-    }
-    
-    const newMap = {};
-    keys.forEach((key, index) => {
-        newMap[key] = values[index];
-    });
-    return newMap;
-}
-
-let currentEncodeMap = { ...baseEncodeMap };
-
+// Hàm encode v2 (dùng mapping cố định)
 function encodeV2(text) {
     let result = "KuriWasHere-";
     for (let i = 0; i < text.length; i++) {
         const ch = text[i];
-        result += currentEncodeMap[ch] || ch;
+        result += encodeMap[ch] || ch;
     }
     return result + "==";
-}
-
-function randomizeMapping() {
-    currentEncodeMap = generateRandomMapping();
 }
 
 const CHARACTERS = [
@@ -530,7 +509,7 @@ async function updateAll() {
             console.log(`[Seramic] ❌ Bug ở A: Không tìm thấy host`);
         }
     }
-
+    
     const sourceB = [
         { name: "RipIndra",      url: "http://fi11.bot-hosting.net:20758/api/name=RipIndra" },
         { name: "Darkbeard",     url: "http://fi11.bot-hosting.net:20758/api/name=Darkbeard" },
@@ -617,8 +596,6 @@ async function updateAll() {
         }
     }
 
-    randomizeMapping();
-
     console.log("[Seramic] Đang lưu dữ liệu...");
     for (const name in allData) {
         const realTotal = allData[name].length;
@@ -642,8 +619,8 @@ async function updateAll() {
 
 app.get('/api', (req, res) => {
     res.json({
-        message: "why have a black monkey here?",
-        ApiHopBF: "By Seramic"
+        message: "Hi Kid",
+        Api: "By Seramic buy dms @seramic.3060"
     });
 });
 
@@ -675,8 +652,9 @@ app.get('/api/:character', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`[Seramic] 🚀 Server đã sẵn sàng`);
-    console.log(`[Seramic] 📍 Port: ${PORT}`);
+    console.log(`[Seramic] server ok`);
+    console.log(`[Seramic] Port: ${PORT}`);
+    console.log(`Api Hop By Seramic`);
 });
 
 setInterval(updateAll, 10000);
