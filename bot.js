@@ -14,8 +14,19 @@ const client = new Client({
     ]
 });
 
-const ADMIN_IDS = ['1219957631578542090', '1400892722340167953'];
-let adminList = [...ADMIN_IDS];
+if (!fs.existsSync('admins.json')) {
+    const defaultAdmins = ['1219957631578542090', '1400892722340167953'];
+    fs.writeFileSync('admins.json', JSON.stringify(defaultAdmins, null, 2));
+    console.log('[Seramic] Da tao file admins.json');
+}
+
+if (!fs.existsSync('sent_jobs.json')) {
+    fs.writeFileSync('sent_jobs.json', JSON.stringify({}, null, 2));
+    console.log('[Seramic] Da tao file sent_jobs.json');
+}
+
+let adminList = JSON.parse(fs.readFileSync('admins.json', 'utf8'));
+let sentJobs = JSON.parse(fs.readFileSync('sent_jobs.json', 'utf8'));
 
 let notifyStatus = false;
 let notifyInterval = null;
@@ -100,15 +111,6 @@ async function checkApiStatus() {
     }
 }
 
-async function checkCharacterApi(character) {
-    try {
-        const response = await axios.get(`${API_URL}/${character}`);
-        return { success: true, data: response.data };
-    } catch (error) {
-        return { success: false, error: error.message };
-    }
-}
-
 async function getCharacterData(character) {
     try {
         const response = await axios.get(`${API_URL}/${character}`);
@@ -125,8 +127,24 @@ function getJobIdKey(jobId, placeId) {
     return `${jobId}_${placeId}`;
 }
 
+function saveAdmins() {
+    try {
+        fs.writeFileSync('admins.json', JSON.stringify(adminList, null, 2));
+    } catch (e) {
+        console.error('[Seramic] Loi luu admins.json:', e);
+    }
+}
+
+function saveSentJobs() {
+    try {
+        fs.writeFileSync('sent_jobs.json', JSON.stringify(sentJobs, null, 2));
+    } catch (e) {
+        console.error('[Seramic] Loi luu sent_jobs.json:', e);
+    }
+}
+
 client.once('ready', async () => {
-    console.log(`Bot da san sang! Logged in as ${client.user.tag}`);
+    console.log(`[Seramic] Bot da san sang! Logged in as ${client.user.tag}`);
     
     const commands = [
         new SlashCommandBuilder()
@@ -163,14 +181,14 @@ client.once('ready', async () => {
     const rest = new REST({ version: '10' }).setToken(token);
 
     try {
-        console.log('Dang dang ky slash commands...');
+        console.log('[Seramic] Dang dang ky slash commands...');
         await rest.put(
             Routes.applicationCommands(client.user.id),
             { body: commands.map(cmd => cmd.toJSON()) }
         );
-        console.log('Da dang ky slash commands!');
+        console.log('[Seramic] Da dang ky slash commands!');
     } catch (error) {
-        console.error('Loi dang ky commands:', error);
+        console.error('[Seramic] Loi dang ky commands:', error);
     }
 });
 
@@ -232,7 +250,7 @@ client.on('interactionCreate', async interaction => {
             });
             
         } catch (error) {
-            console.error('Loi setup-notify:', error);
+            console.error('[Seramic] Loi setup-notify:', error);
             await interaction.editReply({
                 content: `Loi khi setup: ${error.message}`
             });
@@ -249,25 +267,6 @@ client.on('interactionCreate', async interaction => {
         }
         
         notifyStatus = true;
-        let sentJobs = {};
-        
-        const loadSentJobs = () => {
-            try {
-                if (fs.existsSync('sent_jobs.json')) {
-                    sentJobs = JSON.parse(fs.readFileSync('sent_jobs.json', 'utf8'));
-                }
-            } catch (e) {
-                sentJobs = {};
-            }
-        };
-        
-        const saveSentJobs = () => {
-            try {
-                fs.writeFileSync('sent_jobs.json', JSON.stringify(sentJobs, null, 2));
-            } catch (e) {}
-        };
-        
-        loadSentJobs();
         
         const notifyLoop = async () => {
             if (!notifyStatus) return;
@@ -316,7 +315,7 @@ client.on('interactionCreate', async interaction => {
                     }
                 }
             } catch (error) {
-                console.error('Loi notify loop:', error);
+                console.error('[Seramic] Loi notify loop:', error);
             }
         };
         
@@ -360,10 +359,7 @@ client.on('interactionCreate', async interaction => {
         }
         
         adminList.push(userId);
-        
-        try {
-            fs.writeFileSync('admins.json', JSON.stringify(adminList, null, 2));
-        } catch (e) {}
+        saveAdmins();
         
         await interaction.editReply({
             content: `Da cap quyen admin cho <@${userId}>!`
@@ -388,10 +384,7 @@ client.on('interactionCreate', async interaction => {
         }
         
         adminList = adminList.filter(id => id !== userId);
-        
-        try {
-            fs.writeFileSync('admins.json', JSON.stringify(adminList, null, 2));
-        } catch (e) {}
+        saveAdmins();
         
         await interaction.editReply({
             content: `Da xoa quyen admin cua <@${userId}>!`
