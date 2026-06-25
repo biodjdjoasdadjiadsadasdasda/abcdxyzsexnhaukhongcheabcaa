@@ -657,6 +657,6 @@ app.listen(PORT, () => {
     console.log(`Api Hop By Seramic`);
 });
 
-setInterval(updateAll, 10000);
+setInterval(updateAll, 1500);
 
 updateAll();
