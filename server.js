@@ -383,7 +383,6 @@ const encodeMap = {
     "-": "@#$%4%^2", "_": "a@!#P!@!2"
 };
 
-// Hàm encode v2 (dùng mapping cố định)
 function encodeV2(text) {
     let result = "KuriWasHere-";
     for (let i = 0; i < text.length; i++) {
@@ -391,6 +390,38 @@ function encodeV2(text) {
         result += encodeMap[ch] || ch;
     }
     return result + "==";
+}
+
+function decodeV2(encoded) {
+    if (!encoded || typeof encoded !== 'string') return null;
+    if (encoded.substring(0, 13) !== "KuriWasHere-") return null;
+    if (encoded.substring(encoded.length - 2) !== "==") return null;
+    
+    const clean = encoded.substring(13, encoded.length - 2);
+    let result = "";
+    let i = 0;
+    
+    const reverseMap = {};
+    for (const [key, value] of Object.entries(encodeMap)) {
+        reverseMap[value] = key;
+    }
+    
+    while (i < clean.length) {
+        let found = false;
+        for (let len = 4; len >= 1; len--) {
+            const chunk = clean.substring(i, i + len);
+            if (reverseMap[chunk]) {
+                result += reverseMap[chunk];
+                i += len;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            i++;
+        }
+    }
+    return result;
 }
 
 const CHARACTERS = [
@@ -427,7 +458,7 @@ function saveToApi(name, dataList) {
 
 function logJobCounts() {
     console.log("\n" + "=".repeat(70));
-    console.log("[Seramic] 📊 Thống kê Job ID theo từng nguồn:");
+    console.log("[Seramic] Thống kê Job ID theo từng nguồn:");
     console.log("-".repeat(70));
     
     for (const name of CHARACTERS) {
@@ -442,7 +473,7 @@ function logJobCounts() {
 
 async function updateAll() {
     console.log("\n" + "=".repeat(60));
-    console.log(`[Seramic] 🕐 [${new Date().toLocaleTimeString()}] đang lấy dữ liệu...`);
+    console.log(`[Seramic] [${new Date().toLocaleTimeString()}] dang lay du lieu...`);
     console.log("=".repeat(60));
     
     CHARACTERS.forEach(name => {
@@ -454,7 +485,7 @@ async function updateAll() {
         allData[name] = [];
     });
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn A...");
+    console.log("[Seramic] Dang lay du lieu tu nguon A...");
     try {
         const res = await axios.get('https://raw.banana-hub.xyz/api/data/recent', {
             headers: { 'User-Agent': 'Roblox/WinInet' },
@@ -483,7 +514,7 @@ async function updateAll() {
                         }
                     } catch (decodeErr) {
                         failedCount++;
-                        console.log(`[Seramic] ❌ Bug ở A (/${characterName}): Không thể diddy`);
+                        console.log(`[Seramic] Bug o A (/${characterName}): Khong the diddy`);
                     }
                 }
             });
@@ -493,23 +524,23 @@ async function updateAll() {
                 const fake = Math.max(0, real - 20);
                 jobCounts[name].a = fake;
                 if (allData[name].length > 0) {
-                    console.log(`[Seramic] ✅ Lấy được ${allData[name].length} Job ID từ nguồn A cho /${name}`);
+                    console.log(`[Seramic] Lay duoc ${allData[name].length} Job ID tu nguon A cho /${name}`);
                 }
             }
             
-            console.log(`[Seramic] ✅ Nguồn A: Tổng ${totalItems} items, diddy: ${decodedCount}, Không thể diddy: ${failedCount}`);
+            console.log(`[Seramic] Nguon A: Tong ${totalItems} items, diddy: ${decodedCount}, Khong the diddy: ${failedCount}`);
         } else {
-            console.log(`[Seramic] ❌ Bug ở A: Không nhận được dữ liệu từ API`);
+            console.log(`[Seramic] Bug o A: Khong nhan duoc du lieu tu API`);
         }
     } catch (e) { 
-        console.log(`[Seramic] ❌ Bug ở A: ${e.message}`);
+        console.log(`[Seramic] Bug o A: ${e.message}`);
         if (e.code === 'ECONNABORTED') {
-            console.log(`[Seramic] ❌ Bug ở A: Timeout - Kết nối quá chậm`);
+            console.log(`[Seramic] Bug o A: Timeout - Ket noi qua cham`);
         } else if (e.code === 'ENOTFOUND') {
-            console.log(`[Seramic] ❌ Bug ở A: Không tìm thấy host`);
+            console.log(`[Seramic] Bug o A: Khong tim thay host`);
         }
     }
-    
+
     const sourceB = [
         { name: "RipIndra",      url: "http://fi11.bot-hosting.net:20758/api/name=RipIndra" },
         { name: "Darkbeard",     url: "http://fi11.bot-hosting.net:20758/api/name=Darkbeard" },
@@ -521,7 +552,7 @@ async function updateAll() {
         { name: "Mirage",        url: "http://fi11.bot-hosting.net:20758/api/name=Mirage" }
     ];
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn B...");
+    console.log("[Seramic] Dang lay du lieu tu nguon B...");
     const fetchPromises = sourceB.map(async (api) => {
         try {
             const res = await fetch(api.url, {
@@ -546,57 +577,57 @@ async function updateAll() {
                     }
                 });
                 jobCounts[api.name].b = count;
-                console.log(`[Seramic] ✅ Lấy được ${count} Job ID từ nguồn B cho /${api.name}`);
+                console.log(`[Seramic] Lay duoc ${count} Job ID tu nguon B cho /${api.name}`);
             } else {
-                console.log(`[Seramic] ❌ Bug ở B (/${api.name}): API trả về success=false hoặc không có data`);
+                console.log(`[Seramic] Bug o B (/${api.name}): API tra ve success=false hoac khong co data`);
             }
         } catch (e) {
-            console.log(`[Seramic] ❌ Bug ở B (/${api.name}): ${e.message}`);
+            console.log(`[Seramic] Bug o B (/${api.name}): ${e.message}`);
             if (e.code === 'ECONNREFUSED') {
-                console.log(`[Seramic] ❌ Bug ở B (/${api.name}): Không thể kết nối đến server`);
+                console.log(`[Seramic] Bug o B (/${api.name}): Khong the ket noi den server`);
             }
         }
     });
 
     await Promise.allSettled(fetchPromises);
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn C...");
+    console.log("[Seramic] Dang lay du lieu tu nguon C...");
     for (const name of CHARACTERS) {
         const fakeCount = Math.floor(Math.random() * 15) + 5;
         jobCounts[name].c = fakeCount;
         if (fakeCount > 0) {
-            console.log(`[Seramic] ✅ Lấy được ${fakeCount} Job ID từ nguồn C cho /${name}`);
+            console.log(`[Seramic] Lay duoc ${fakeCount} Job ID tu nguon C cho /${name}`);
         }
     }
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn D...");
+    console.log("[Seramic] Dang lay du lieu tu nguon D...");
     for (const name of CHARACTERS) {
         const fakeCount = Math.floor(Math.random() * 8) + 1;
         jobCounts[name].d = fakeCount;
         if (fakeCount > 0) {
-            console.log(`[Seramic] ✅ Lấy được ${fakeCount} Job ID từ nguồn D cho /${name}`);
+            console.log(`[Seramic] Lay duoc ${fakeCount} Job ID tu nguon D cho /${name}`);
         }
     }
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn E...");
+    console.log("[Seramic] Dang lay du lieu tu nguon E...");
     for (const name of CHARACTERS) {
         const fakeCount = Math.floor(Math.random() * 6) + 1;
         jobCounts[name].e = fakeCount;
         if (fakeCount > 0) {
-            console.log(`[Seramic] ✅ Lấy được ${fakeCount} Job ID từ nguồn E cho /${name}`);
+            console.log(`[Seramic] Lay duoc ${fakeCount} Job ID tu nguon E cho /${name}`);
         }
     }
 
-    console.log("[Seramic] Đang lấy dữ liệu từ nguồn F...");
+    console.log("[Seramic] Dang lay du lieu tu nguon F...");
     for (const name of CHARACTERS) {
         const fakeCount = Math.floor(Math.random() * 20) + 5;
         jobCounts[name].f = fakeCount;
         if (fakeCount > 0) {
-            console.log(`[Seramic] ✅ Lấy được ${fakeCount} Job ID từ nguồn F cho /${name}`);
+            console.log(`[Seramic] Lay duoc ${fakeCount} Job ID tu nguon F cho /${name}`);
         }
     }
 
-    console.log("[Seramic] Đang lưu dữ liệu...");
+    console.log("[Seramic] Dang luu du lieu...");
     for (const name in allData) {
         const realTotal = allData[name].length;
         if (realTotal > 0) {
@@ -614,13 +645,96 @@ async function updateAll() {
     }
 
     logJobCounts();
-    console.log(`[Seramic] ✅ Hoàn tất!`);
+    console.log(`[Seramic] Hoan tat!`);
 }
+
+app.get('/api/push', (req, res) => {
+    res.json({
+        message: "why have a black monkey here",
+        ApiHopBF: "By Seramic"
+    });
+});
+
+app.post('/api/push', (req, res) => {
+    const { character, jobId, players, placeId } = req.body;
+
+    if (!character) {
+        return res.json({
+            ApiHopBF: "By Seramic",
+            success: false,
+            error: "Missing character name"
+        });
+    }
+
+    if (!jobId) {
+        return res.json({
+            ApiHopBF: "By Seramic",
+            success: false,
+            error: "Missing jobId"
+        });
+    }
+
+    const fileName = `api/${character.replace(/\s+/g, '')}.json`;
+    let existingData = { data: [] };
+
+    if (fs.existsSync(fileName)) {
+        try {
+            existingData = JSON.parse(fs.readFileSync(fileName, 'utf8'));
+        } catch (e) {
+            existingData = { data: [] };
+        }
+    }
+
+    const newEntry = {
+        placeId: placeId || "unknown",
+        players: players || 0,
+        jobId: jobId
+    };
+
+    const isDuplicate = existingData.data.some(item => 
+        item.jobId === newEntry.jobId && item.placeId === newEntry.placeId
+    );
+
+    if (!isDuplicate) {
+        existingData.data.push(newEntry);
+        
+        if (existingData.data.length > 50) {
+            existingData.data = existingData.data.slice(-50);
+        }
+        
+        const encodedData = existingData.data.map(item => ({
+            ...item,
+            jobId: encodeV2(item.jobId)
+        }));
+        
+        const jsonOutput = {
+            ApiHopBF: "By Seramic",
+            success: true,
+            count: encodedData.length,
+            data: encodedData
+        };
+        
+        fs.writeFileSync(fileName, JSON.stringify(jsonOutput, null, 2));
+        
+        res.json({
+            ApiHopBF: "By Seramic",
+            success: true,
+            message: `Added ${character} to API`,
+            data: newEntry
+        });
+    } else {
+        res.json({
+            ApiHopBF: "By Seramic",
+            success: false,
+            message: "Duplicate jobId"
+        });
+    }
+});
 
 app.get('/api', (req, res) => {
     res.json({
-        message: "Hi Kid",
-        Api: "By Seramic buy dms @seramic.3060"
+        message: "why have a black monkey here",
+        ApiHopBF: "By Seramic"
     });
 });
 
@@ -652,11 +766,9 @@ app.get('/api/:character', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`[Seramic] server ok`);
+    console.log(`[Seramic] Server da san sang`);
     console.log(`[Seramic] Port: ${PORT}`);
-    console.log(`Api Hop By Seramic`);
 });
 
-setInterval(updateAll, 1000);
-
+setInterval(updateAll, 5000);
 updateAll();
